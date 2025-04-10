@@ -29,11 +29,7 @@ df_q3 = pd.read_csv(os.path.join(os.getcwd(), 'q3.csv'), encoding='utf-8-sig')
 df_q3 = df_q3[df_q3['Occupation - Unit group - National Occupational Classification (NOC) 2021 (821A)'].str.contains('|'.join(['computer', 'mechanical', 'electrical']), case=False, na=False)]
 df_q3 = df_q3.groupby(['GEO', 'Occupation - Unit group - National Occupational Classification (NOC) 2021 (821A)', 'Gender (3)'])['VALUE'].sum().reset_index()
 
-df_q4 = pd.read_csv(os.path.join(os.getcwd(), 'q4.csv'), encoding='utf-8-sig')
-#filtering for q4
-df_q4 = df_q4[['GEO', 'Highest certificate, diploma or degree (16)', 'Gender (3)', 'VALUE']]
-df_q4 = df_q4[df_q4['Gender (3)'].isin(['Men+', 'Women+'])]
-df_q4 = df_q4[df_q4['Highest certificate, diploma or degree (16)'] != 'Total - Highest certificate, diploma or degree']
+
 
 app = dash.Dash(__name__)
 server = app.server
@@ -63,14 +59,7 @@ fig_q3 = px.bar(df_q3,
                 labels={"Occupation - Unit group - National Occupational Classification (NOC) 2021 (821A)": "Occupation",
                         "VALUE": "Number of Engineers", "Gender (3)": "Gender"},
                 barmode='group') #q3 figure
-fig_q4 = px.bar(df_q4,
-                x='Highest certificate, diploma or degree (16)',
-                y='VALUE',
-                color='Gender (3)',
-                title="Total Number of People Across Education Levels by Gender",
-                labels={"Highest certificate, diploma or degree (16)": "Education Level",
-                        "VALUE": "Number of People", "Gender (3)": "Gender"},
-                barmode='group') #q4 figure
+
 app.layout = html.Div([
     html.H1("Dashboard: Employment and Human Resource Distribution", style={'text-align': 'center'}),#h1 header for q1
     html.Div([#q1 div
@@ -120,23 +109,7 @@ app.layout = html.Div([
             value='Ontario',
             style={'width': '50%'}
         ),
-    ], style={'padding': '20px'}),
-    html.Div([ #q4 barplot div
-        dcc.Graph(
-            id='gender-distribution-bar',
-            figure=fig_q4
-        ),
-    ], style={'padding': '20px'}),
-    html.Div([ #q4 dropdown div
-        html.Label("Select province for Question 4:"),
-        dcc.Dropdown(
-            id='geo-dropdown-q4',
-            options=[{'label': geo, 'value': geo} for geo in df_q4['GEO'].unique()],
-            value='Ontario',
-            style={'width': '50%'}
-        ),
-    ], style={'padding': '20px'}),
-])
+    ], style={'padding': '20px'})
 @app.callback(#q1 callback
     Output('essential-services-bar', 'figure'),
     [Input('job-category-dropdown', 'value'), Input('province-dropdown-q1', 'value')]
@@ -182,20 +155,6 @@ def update_q3_figure(selected_geo):
                                     "VALUE": "Number of Engineers", "Gender (3)": "Gender"},
                             barmode='group')
     return fig_q3_updated
-@app.callback(#q4 callback
-    Output('gender-distribution-bar', 'figure'),
-    [Input('geo-dropdown-q4', 'value')]
-)
-def update_q4_figure(selected_geo):
-    filtered_df_q4 = df_q4[df_q4['GEO'] == selected_geo]
-    fig_q4_updated = px.bar(filtered_df_q4,
-                            x='Highest certificate, diploma or degree (16)',
-                            y='VALUE',
-                            color='Gender (3)',
-                            title=f"Gender Distribution for Education Levels in {selected_geo}",
-                            labels={"Highest certificate, diploma or degree (16)": "Education Level",
-                                    "VALUE": "Number of People", "Gender (3)": "Gender"},
-                            barmode='group')
-    return fig_q4_updated
+
 if __name__ == '__main__':
     app.run(debug=False, use_reloader=False)
