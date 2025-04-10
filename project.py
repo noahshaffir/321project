@@ -109,7 +109,7 @@ app.layout = html.Div([
             value='Ontario',
             style={'width': '50%'}
         ),
-    ], style={'padding': '20px'})
+    ], style={'padding': '20px'}])
 @app.callback(#q1 callback
     Output('essential-services-bar', 'figure'),
     [Input('job-category-dropdown', 'value'), Input('province-dropdown-q1', 'value')]
